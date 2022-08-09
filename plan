@@ -1,0 +1,42 @@
+BlackJack
+
+
+1) i want to as a player, play against the dealer.
+
+2) i want to draw 2 random cards for myself - both face up for all to see
+3) i want to draw 2 random cards for the dealer.  One will be visible to me, the other face down
+4) I want to chose first whether to stick or twist.
+	This will result in two outcomes:
+		4a) Once I have decided to stick it is the dealers turn to decide whether to stick or twist.  Go to point 5.
+		4b) I've gone bust, in which case, the hand is over, and I lose.
+
+5) I want the dealer to determine whether to stick or twist. they will need to try and beat my card.
+Once it is the dealers turn, they will turn over the face down card before making a choice.
+
+
+
+
+
+betting
+	if you win, you get the equal amount back (if you bet $50, you get an additional $50 back.)
+	if you push, and get the same as the dealer, you don't win or lost
+	if you get blackjack (an ace and any picture card) you win immediately (assuming the dealer doesn't have one also), and you're paid 150% of your bet.
+
+pushing
+	you can push once the hands are dealt if you scored the same as the dealer.  no money changes hands, and it's on to the next hand
+
+hit
+stand
+split
+	if you are dealt two of the same card (2x 8's or 2x 2's or 2x Kings).  You can chose to split. You need to add a bet of the same value.  you then are essentially playing multiple hands at once where you can stick or twist on each hand.
+	NB: You can only split once, so if you had 2x 8's and got another - you can't split again.
+double down
+	only available on your first two cards if value is nine, 10 or 11.  need to place a bet of equal amount.  dealer will give you one card (sideways). and no more changes to that hand
+Insurance - not for day 1.
+	Can be bought if the dealer face up card is an ace.  to guard against their blackjack. If they do, you'll have your chance to add in 50% of your bet to the insurance line on the table.  So if they do have a blackjack
+
+
+
+Reference:
+for the dealer to work out the best strategy:
+https://www.blackjackapprenticeship.com/blackjack-strategy-charts/
