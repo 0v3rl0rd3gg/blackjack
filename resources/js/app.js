@@ -32,7 +32,7 @@ blackjack.app = {
                 bet:  $("input[name=bet]").val(),
             },
             success: function(result){
-console.log(result);
+
                 // stake chips
                 $('.stake-chips').html(result['bet']);
                 // populate the placeholders for both players
