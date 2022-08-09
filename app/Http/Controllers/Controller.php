@@ -116,14 +116,12 @@ class Controller extends BaseController
 
 		$this->deal();
 
-		echo '<pre>';
-		var_dump($this->hand['playerCards']);
-		echo '</pre>';
+
 		// find the available options (stick, slice, double down, hit)
 		$options = $this->bettingOptions($this->hand['playerCards']);
 
-		dd($options);
-		return [ 'bet' => $bet, 'hand' => $this->deal(), 'options' =>[] ];
+
+		return [ 'bet' => $bet, 'hand' => $this->deal(), 'options' =>$options ];
 	}
 
 	/**
@@ -166,8 +164,10 @@ class Controller extends BaseController
 		// need to seperate the last character, as that is suit
 		// (e.g. 7D, 10H, KS need to become 7, 10, K)
 		// Also need to convert K, J, Q to 10)
+
 		$hand = $this->removeSuit($hand);
 		$options['split'] = $this->calculateSplit($hand);
+
 		$sanitisedCards = $this->convertPictureCards($hand);
 		$options['double'] = $this->calculateDoubleDown($sanitisedCards);
 		return $options;

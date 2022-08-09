@@ -8,6 +8,16 @@ use PHPUnit\Framework\TestCase;
 class CalculateTest extends TestCase
 {
 
+	public function test_calculateSplit_Fails()
+	{
+		$hand = ['AH','KD'];
+		$controller = new Controller();
+		$hand = $controller->removeSuit($hand);
+
+		$this->assertFalse($controller->calculateSplit($hand));
+	}
+
+
     public function test_calculateDoubleDown_FailsWithSoftHand()
     {
 	    $softHand = ['A',2];

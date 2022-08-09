@@ -1,4 +1,5 @@
 <x-app-layout>
+
     <x-slot name="header"></x-slot>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -29,10 +30,10 @@
                             <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                                 Hit
                             </button>
-                            <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            <button class="dd-button bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded hidden">
                                 Double Down
                             </button>
-                            <button class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded">
+                            <button class="split-button bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded hidden">
                                 Split
                             </button>
                             <form action="/post-bet" class="post-bet" method="post">
