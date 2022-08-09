@@ -190,15 +190,11 @@ class Controller extends BaseController
 	 */
 	public function calculateDoubleDown($hand) : bool
 	{
-		// on hard 9, 10 or 11 - so, no ace, and the two add up to 9, 10, or 11
-		// or soft 16, 17 or 18 -  so basically, and ace and a 5, 6, or 7
 		$soft = $this->softOrHard($hand);
-		$softScore = [16,17,18];
-		$hardScore = [9,10,11];
-		$handTotal = $hand[0] + $hand[1];
 
 		// If it's hard then we need to work out if it can make 9, 10 or 11
 		if($soft === false){
+			$handTotal = $hand[0] + $hand[1];
 			if( $handTotal > 8 && $handTotal < 12 ){
 				return true;
 			}
@@ -206,17 +202,13 @@ class Controller extends BaseController
 		}
 		// if it's soft then we need to work out if it can make 16, 17 or 18
 		else{
-			$softCards = [5,6,7];
 			foreach($hand as $card){
-				foreach($softCards as $softCard){
-					if($softCard === $card){
-						return true;
-					}
+				if( $card > 4 && $card < 8 ){
+					return true;
 				}
 			}
 		}
 		return false;
-
 	}
 
 	/**
