@@ -113,9 +113,7 @@ class Controller extends BaseController
 		// todo for now, I'll just return what they submitted
 
 		// now we've collected the bet, continue the game
-
 		$deal = $this->deal();
-
 
 		// find the available options (stick, slice, double down, hit)
 		$options = $this->bettingOptions($this->hand['playerCards']);
