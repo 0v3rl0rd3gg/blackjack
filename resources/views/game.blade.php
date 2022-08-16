@@ -24,13 +24,13 @@
                             Stake Chips here
                         </div>
                         <div class="player-actions">
-                            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            <button class="stand-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                                 Stand
                             </button>
-                            <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                            <button class="hit-button bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                                 Hit
                             </button>
-                            <button class="dd-button bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded hidden">
+                            <button class="double-down-button bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded hidden">
                                 Double Down
                             </button>
                             <button class="split-button bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded hidden">
@@ -39,7 +39,7 @@
                             <form action="/post-bet" class="post-bet" method="post">
                                 @csrf
                                 <input type="number" min="0" name="bet">
-                                <button type="submit">Place Bet</button>
+                                <button type="submit" class="place-bet">Place Bet</button>
                             </form>
                         </div>
                     </div>

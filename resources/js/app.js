@@ -22,9 +22,35 @@ blackjack.app = {
             self.postBet();
         });
 
+        $('.split-button').on('click',function(e){
+            e.preventDefault();
+            self.split();
+        });
+
+        $('.double-down-button').on('click',function(e){
+            e.preventDefault();
+            self.doubleDown();
+        });
+
+    },
+    validateBet: function(val){
+        if( $.isNumeric(val) && ( val > 0 && val < 1001 ) ){
+            return true;
+        }
+        return false;
     },
     postBet: function()
     {
+        let self = this;
+        if( self.validateBet($("input[name=bet]").val() ) === false ){
+            alert('invalid bet placed.  Please refresh and try again');
+            return;
+        }
+        // hide the place bet button and don't allow them to change their bet.
+        // todo - remove comments once done testing
+        //$("input[name=bet]").attr('disabled','disabled');
+        //$('.place-bet').addClass('hidden');
+
         $.ajax({
             url: "/post-bet",
             method: 'post',
@@ -32,21 +58,23 @@ blackjack.app = {
                 bet:  $("input[name=bet]").val(),
             },
             success: function(result){
-
+                let playerCards = $('.player-cards');
+                let dealerCards = $('.dealer-cards');
                 // stake chips
                 $('.stake-chips').html(result['bet']);
                 // populate the placeholders for both players
                 $('.player-cards, .dealer-cards').empty();
+
                 //player first
-                $('.player-cards').append('<div class="card-up">'+result['hand']['playerCards'][0]+'</div>');
-                $('.dealer-cards').append('<div class="card-down">'+result['hand']['dealerCards'][0]+'</div>');
-                $('.player-cards').append('<div class="card-up">'+result['hand']['playerCards'][1]+'</div>');
-                $('.dealer-cards').append('<div class="card-down">'+result['hand']['dealerCards'][1]+'</div>');
+                playerCards.append('<div class="card-up">'+result['hand']['playerCards'][0]+'</div>');
+                dealerCards.append('<div class="card-down">'+result['hand']['dealerCards'][0]+'</div>');
+                playerCards.append('<div class="card-up">'+result['hand']['playerCards'][1]+'</div>');
+                dealerCards.append('<div class="card-down">'+result['hand']['dealerCards'][1]+'</div>');
 
                 if(result['options'].double){
-                    $('.dd-button').removeClass('hidden');
-                }else if($('.dd-button').not('.hidden')){
-                    $('.dd-button').addClass('hidden');
+                    $('.double-down-button').removeClass('hidden');
+                }else if($('.double-down-button').not('.hidden')){
+                    $('.double-down-button').addClass('hidden');
                 }
                 if(result['options'].split){
                     $('.split-button').removeClass('hidden');
@@ -58,6 +86,31 @@ blackjack.app = {
                 console.log(e.message);
             }
         });
+    },
+
+    split: function() {
+        $.ajax({
+            url: "/split",
+            method: 'post',
+            data: {
+                bet: $("input[name=bet]").val(),
+            },
+            success: function (result) {
+console.log(result);
+            }
+        })
+    },
+    doubleDown: function() {
+        $.ajax({
+            url: "/double-down",
+            method: 'post',
+            data: {
+                bet: $("input[name=bet]").val(),
+            },
+            success: function (result) {
+
+            }
+        })
     }
 };
 

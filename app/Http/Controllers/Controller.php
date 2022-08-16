@@ -114,14 +114,32 @@ class Controller extends BaseController
 
 		// now we've collected the bet, continue the game
 
-		$this->deal();
+		$deal = $this->deal();
 
 
 		// find the available options (stick, slice, double down, hit)
 		$options = $this->bettingOptions($this->hand['playerCards']);
 
 
-		return [ 'bet' => $bet, 'hand' => $this->deal(), 'options' =>$options ];
+		return [ 'bet' => $bet, 'hand' => $deal, 'options' =>$options ];
+	}
+
+	public function split(Request $request) : array
+	{
+		echo '<pre>';
+		var_dump($request);
+		echo '</pre>';
+		die();
+		return [ 'bet' => $bet, 'hand' => $deal, 'options' =>$options ];
+	}
+
+	public function doubleDown(Request $request) : array
+	{
+		echo '<pre>';
+		var_dump($request);
+		echo '</pre>';
+		die();
+		return [ 'bet' => $bet, 'hand' => $deal, 'options' =>$options ];
 	}
 
 	/**

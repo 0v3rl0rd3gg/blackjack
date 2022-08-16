@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 //Route::get('/dashboard', 'App\Http\Controllers\Controller@index');
 Route::get('/dashboard', [\App\Http\Controllers\Controller::class, 'index']);
 Route::post('post-bet', [\App\Http\Controllers\Controller::class, 'postBet']);
+Route::post('split', [\App\Http\Controllers\Controller::class, 'split']);
+Route::post('double-down', [\App\Http\Controllers\Controller::class, 'doubleDown']);
 
 //Route::get('/dashboard', function () {
 //   return view('game');
