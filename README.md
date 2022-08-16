@@ -2,6 +2,13 @@
 
 <p align="center">
 <img src="https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=reliability_rating" alt="Build Status" />
+<img src="https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=alert_status" alt="Build Status" />
+<img src="https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=code_smells" alt="Build Status" />
+<img src="https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=sqale_rating" alt="Build Status" />
+<img src="https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=security_rating" alt="Build Status" />
+<img src="https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=bugs" alt="Build Status" />
+<img src="https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=bugs" alt="Build Status" />
+<img src="https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=vulnerabilities" alt="Build Status" />
 </p>
 
 ## About Blackjack
