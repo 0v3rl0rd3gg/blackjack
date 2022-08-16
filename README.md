@@ -1,7 +1,7 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
 <p align="center">
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=0v3rl0rd3gg_blackjack)
+<img src="https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=reliability_rating" alt="Build Status" />
 </p>
 
 ## About Blackjack
