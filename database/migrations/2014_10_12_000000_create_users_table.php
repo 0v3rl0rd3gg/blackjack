@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->integer('chips')->default(1000);
+            $table->integer('balance')->default(1000);
             $table->integer('refilled')->default(0);
             $table->integer('hands_won')->default(0);
             $table->integer('hands_lost')->default(0);

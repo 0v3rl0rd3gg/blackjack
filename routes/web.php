@@ -13,14 +13,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//Route::get('/dashboard', 'App\Http\Controllers\Controller@index');
-Route::get('/dashboard', [\App\Http\Controllers\Controller::class, 'index']);
-Route::post('post-bet', [\App\Http\Controllers\Controller::class, 'postBet']);
-Route::post('split', [\App\Http\Controllers\Controller::class, 'split']);
-Route::post('double-down', [\App\Http\Controllers\Controller::class, 'doubleDown']);
+Route::get('/', function () {
+	return redirect('/login');
+});
 
-//Route::get('/dashboard', function () {
-//   return view('game');
-//})->middleware(['auth'])->name('dashboard');
+Route::get( '/dashboard', [ \App\Http\Controllers\Controller::class, 'index' ] )->middleware('auth');;
+Route::post( 'post-bet', [ \App\Http\Controllers\Controller::class, 'postBet' ] );
+Route::get( 'split', [ \App\Http\Controllers\Controller::class, 'split' ] );
+Route::get( 'double-down', [ \App\Http\Controllers\Controller::class, 'doubleDown' ] );
 
 require __DIR__.'/auth.php';

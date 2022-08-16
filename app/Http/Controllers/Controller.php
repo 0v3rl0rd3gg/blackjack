@@ -10,13 +10,14 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Auth;
 use function Termwind\breakLine;
 
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-	public $cards = [
+	public $deck = [
 		'AH',
 		'2H',
 		'3H',
@@ -70,7 +71,8 @@ class Controller extends BaseController
 		'QC',
 		'KC'
 	];
-	public $hand = [];
+	public $playerHand = [];
+	public $dealerHand = [];
 
 	public $chips = [
 		[ 'value' => 5, 'colour' => 'White' ],
@@ -80,13 +82,10 @@ class Controller extends BaseController
 		[ 'value' => 100, 'colour' => 'Black' ],
 	];
 
-
 	public function index()
     {
-
-    	$chips = $this->chipBalance();
-
-	    return view('game');
+    	$balance = $this->chipBalance();
+	    return view('game',[ 'balance' => $balance]);
     }
 
 
@@ -97,7 +96,7 @@ class Controller extends BaseController
 	public function chipBalance() : int
 	{
 		// check user has enough chips,  // todo if not - need option to buy back in.
-		return auth()->user()->chips;
+		return auth()->user()->balance;
 	}
 
 	/**
@@ -112,32 +111,71 @@ class Controller extends BaseController
 		// we also need to work out how much they have left and whether they can afford the bet
 		// todo for now, I'll just return what they submitted
 
+		// This is the initial deal, so shuffle the deck.
+		$this->shuffleDeck();
+
 		// now we've collected the bet, continue the game
 		$deal = $this->deal();
 
 		// find the available options (stick, slice, double down, hit)
-		$options = $this->bettingOptions($this->hand['playerCards']);
+		$options = $this->bettingOptions($this->getPlayerHand());
+		//dd($this->playerHand);
 
-
-		return [ 'bet' => $bet, 'hand' => $deal, 'options' =>$options ];
+		return [ 'bet' => $bet, 'hand' => $deal, 'options' => $options ];
 	}
 
 	public function split(Request $request) : array
 	{
-		echo '<pre>';
-		var_dump($request);
-		echo '</pre>';
-		die();
-		return [ 'bet' => $bet, 'hand' => $deal, 'options' =>$options ];
+		// 1. Check additional funds available
+		// 2. If available - Add additional funds
+		// 3. If not available - display message - allow user to purchase additional funds
+		// 4. Separate cards
+		// 5. Deal a card to the A hand
+		// 6. Give the option to Hit or Stand
+		// 7. If Hit - deal another card
+		// 8. If not bust, give option to Hit or Stand
+		// 9. If Bust or Stand - then move to the next card
+		// 10. Go back to step 4.
+		// 11. Once finished on the second hand
+		// 12. Move to the Dealer
+
 	}
 
 	public function doubleDown(Request $request) : array
 	{
-		echo '<pre>';
-		var_dump($request);
-		echo '</pre>';
-		die();
-		return [ 'bet' => $bet, 'hand' => $deal, 'options' =>$options ];
+		$user = Auth::user();
+
+		// Check additional funds available
+		if($request->bet > $user->balance){
+			// the user doesn't have enough cash.
+			// todo display message - allow user to purchase additional funds
+		}else{
+			// If available - Add additional funds
+			$bet = ( $request->bet * 2 );
+		}
+		// Deal 1 card, lay it over the other two
+
+		// todo The issue here is it's overwriting the original hand with the new card
+		// todo I need to somehow 'add' to the session rather than replace
+		$this->setPlayerHand($this->pickCards(1));
+		// Calculate if they have gone bust
+		//$score = $this->calculateScore();
+		dd($this->getPlayerHand());
+
+		// 5. Return the card and move to the dealer
+
+		// 6. Move to the dealer
+		return [ 'bet' => $bet, 'cards' => $this->getPlayerHand(), 'result' => false ];
+	}
+
+	/**
+	 *
+	 */
+	public function calculateScore()
+	{
+		$convertedCards = $this->convertPictureCards();
+		// softOrHard
+		// removeSuit
 	}
 
 	/**
@@ -145,14 +183,35 @@ class Controller extends BaseController
 	 */
 	public function deal() : array
 	{
-		// only shuffle before the initial deal
-		$this->shuffleDeck();
-		$this->hand['playerCards'] = $this->pickCards(2);
-		$this->hand['dealerCards'] = $this->pickCards(2);
+		$this->setPlayerHand($this->pickCards(2));
+		$this->setDealerHand($this->pickCards(2));
 
-		return $this->hand;
+		return [
+			'playerHand' => $this->getPlayerHand(),
+			'dealerHand' => $this->getDealerHand()
+		];
+
 	}
 
+	public function getPlayerHand()
+	{
+		return session('playerHand');
+	}
+
+	public function setPlayerHand($cards)
+	{
+		session(['playerHand' => $cards]);
+	}
+
+	public function getDealerHand()
+	{
+		return session('dealerHand');
+	}
+
+	public function setDealerHand($cards)
+	{
+		session(['dealerHand' => $cards]);
+	}
 
 	/**
 	 * @param $num
@@ -162,22 +221,24 @@ class Controller extends BaseController
 	public function pickCards($num) : array
 	{
 		// collect $num cards from the deck
-		$cards = array_slice($this->cards,0,$num);
+		$cards = array_slice($this->deck,0,$num);
 		// remove them from the deck, so they can't be re-retrieved
-		$this->cards = array_diff($this->cards,$cards);
+		$this->deck = array_diff($this->deck,$cards);
 		// return the selected cards
 		return $cards;
-
 	}
 
+	/**
+	 *
+	 */
 	public function shuffleDeck()
 	{
-		shuffle($this->cards);
+		shuffle($this->deck);
 	}
 
 	public function bettingOptions($hand)
 	{
-		// need to seperate the last character, as that is suit
+		// need to separate the last character, as that is suit
 		// (e.g. 7D, 10H, KS need to become 7, 10, K)
 		// Also need to convert K, J, Q to 10)
 
@@ -214,7 +275,6 @@ class Controller extends BaseController
 			if( $handTotal > 8 && $handTotal < 12 ){
 				return true;
 			}
-
 		}
 		// if it's soft then we need to work out if it can make 16, 17 or 18
 		else{

@@ -48,8 +48,9 @@ blackjack.app = {
         }
         // hide the place bet button and don't allow them to change their bet.
         // todo - remove comments once done testing
-        //$("input[name=bet]").attr('disabled','disabled');
-        //$('.place-bet').addClass('hidden');
+        $("input[name=bet]").addClass('hidden');
+        $('.place-bet').addClass('hidden');
+
 
         $.ajax({
             url: "/post-bet",
@@ -66,12 +67,12 @@ blackjack.app = {
                 $('.player-cards, .dealer-cards').empty();
 
                 //player first
-                playerCards.append('<div class="card-up">'+result['hand']['playerCards'][0]+'</div>');
-                dealerCards.append('<div class="card-down">'+result['hand']['dealerCards'][0]+'</div>');
-                playerCards.append('<div class="card-up">'+result['hand']['playerCards'][1]+'</div>');
-                dealerCards.append('<div class="card-down">'+result['hand']['dealerCards'][1]+'</div>');
+                playerCards.append('<div class="card-up">'+result['hand']['playerHand'][0]+'</div>');
+                dealerCards.append('<div class="card-down">'+result['hand']['dealerHand'][0]+'</div>');
+                playerCards.append('<div class="card-up">'+result['hand']['playerHand'][1]+'</div>');
+                dealerCards.append('<div class="card-down">'+result['hand']['dealerHand'][1]+'</div>');
 
-                if(result['options'].double){
+               /* if(result['options'].double){
                     $('.double-down-button').removeClass('hidden');
                 }else if($('.double-down-button').not('.hidden')){
                     $('.double-down-button').addClass('hidden');
@@ -80,7 +81,7 @@ blackjack.app = {
                     $('.split-button').removeClass('hidden');
                 }else if($('.split-button').not('.hidden')){
                     $('.split-button').addClass('hidden');
-                }
+                }*/
             },
             error: function(e){
                 console.log(e.message);
@@ -91,24 +92,29 @@ blackjack.app = {
     split: function() {
         $.ajax({
             url: "/split",
-            method: 'post',
+            method: 'get',
             data: {
                 bet: $("input[name=bet]").val(),
             },
             success: function (result) {
-console.log(result);
+                console.log(result);
             }
         })
     },
     doubleDown: function() {
         $.ajax({
             url: "/double-down",
-            method: 'post',
+            method: 'get',
             data: {
                 bet: $("input[name=bet]").val(),
             },
             success: function (result) {
 
+                let playerCards = $('.player-cards');
+                // update the pot
+                $('.stake-chips').html(result['bet']);
+                playerCards.append('<div class="card-up">'+result['card']+'</div>');
+                $('.double-down-button').addClass('hidden');
             }
         })
     }
