@@ -8,7 +8,7 @@
 <img src="https://sonarcloud.io/api/project_badges/measure?project=0v3rl0rd3gg_blackjack&metric=vulnerabilities" alt="Build Status" />
 </p>
 
-# Blackjack
+# Blackjack Game
 
 This is a simple game.
 
