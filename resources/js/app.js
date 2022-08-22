@@ -113,7 +113,7 @@ blackjack.app = {
                 let playerCards = $('.player-cards');
                 // update the pot
                 $('.stake-chips').html(result['bet']);
-                playerCards.append('<div class="card-up">'+result['card']+'</div>');
+                playerCards.append('<div class="card-up">'+result['playerHand'][2]+'</div>');
                 $('.double-down-button').addClass('hidden');
             }
         })

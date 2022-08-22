@@ -119,10 +119,10 @@ class Controller extends BaseController
 
 		// find the available options (stick, slice, double down, hit)
 		$options = $this->bettingOptions($this->getPlayerHand());
-		//dd($this->playerHand);
 
 		return [ 'bet' => $bet, 'hand' => $deal, 'options' => $options ];
 	}
+
 
 	public function split(Request $request) : array
 	{
@@ -154,18 +154,16 @@ class Controller extends BaseController
 			$bet = ( $request->bet * 2 );
 		}
 		// Deal 1 card, lay it over the other two
-
-		// todo The issue here is it's overwriting the original hand with the new card
-		// todo I need to somehow 'add' to the session rather than replace
-		$this->setPlayerHand($this->pickCards(1));
+		// Add new card to existing hand
+		$newHand = array_merge($this->getPlayerHand(),$this->pickCards(1));
+		$this->setPlayerHand($newHand);
 		// Calculate if they have gone bust
-		//$score = $this->calculateScore();
-		dd($this->getPlayerHand());
+
 
 		// 5. Return the card and move to the dealer
 
-		// 6. Move to the dealer
-		return [ 'bet' => $bet, 'cards' => $this->getPlayerHand(), 'result' => false ];
+		// 6. Move play to the dealer
+		return [ 'bet' => $bet, 'playerHand' => $this->getPlayerHand(), 'result' => false ];
 	}
 
 	/**
@@ -213,6 +211,16 @@ class Controller extends BaseController
 		session(['dealerHand' => $cards]);
 	}
 
+	public function getDeck()
+	{
+		return session('deck');
+	}
+
+	public function setDeck($deck)
+	{
+		session(['deck' => $deck]);
+	}
+
 	/**
 	 * @param $num
 	 * @desc Pick cards from the deck
@@ -220,10 +228,11 @@ class Controller extends BaseController
 	 */
 	public function pickCards($num) : array
 	{
+
 		// collect $num cards from the deck
-		$cards = array_slice($this->deck,0,$num);
+		$cards = array_slice($this->getDeck(),0,$num);
 		// remove them from the deck, so they can't be re-retrieved
-		$this->deck = array_diff($this->deck,$cards);
+		$this->setDeck( array_diff( $this->getDeck(),$cards ) );
 		// return the selected cards
 		return $cards;
 	}
@@ -233,7 +242,9 @@ class Controller extends BaseController
 	 */
 	public function shuffleDeck()
 	{
-		shuffle($this->deck);
+		$shuffledDeck = $this->deck;
+		shuffle($shuffledDeck);
+		$this->setDeck( $shuffledDeck );
 	}
 
 	public function bettingOptions($hand)
