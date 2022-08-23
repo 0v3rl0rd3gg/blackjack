@@ -115,6 +115,10 @@ blackjack.app = {
                 $('.stake-chips').html(result['bet']);
                 playerCards.append('<div class="card-up">'+result['playerHand'][2]+'</div>');
                 $('.double-down-button').addClass('hidden');
+                if(result.result === false){
+                    alert('bust!');
+                }
+
             }
         })
     }

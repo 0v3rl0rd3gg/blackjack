@@ -159,21 +159,42 @@ class Controller extends BaseController
 		$this->setPlayerHand($newHand);
 		// Calculate if they have gone bust
 
+		$result = (( $this->calculateScore($this->getPlayerHand()) > 21 )? false : true );
 
 		// 5. Return the card and move to the dealer
 
 		// 6. Move play to the dealer
-		return [ 'bet' => $bet, 'playerHand' => $this->getPlayerHand(), 'result' => false ];
+		return [ 'bet' => $bet, 'playerHand' => $this->getPlayerHand(), 'result' => $result ];
 	}
 
 	/**
+	 * @param $hand
 	 *
+	 * @return float|int
 	 */
-	public function calculateScore()
+	public function calculateScore($hand)
 	{
-		$convertedCards = $this->convertPictureCards();
-		// softOrHard
-		// removeSuit
+		$suitRemoved = $this->removeSuit($hand);
+		$convertedCards = $this->convertPictureCards($suitRemoved); // removeSuit
+
+		// Find out if there are Aces in the hand
+		if( $acesCount = count( array_keys($convertedCards, 'A')  ) ){  // are there any aces
+			$aces  = ['A']; // set the array up to remove aces from the deck
+			$score = array_sum(array_diff($convertedCards, $aces)); // calculate the score of the remaining cards (minus the ace(s))
+
+			$scoreWithAcesAsOne = $score + $acesCount;
+			$scoreWithAcesAsEleven = ($score + $acesCount) + 10;
+
+			if( $scoreWithAcesAsEleven > 21){ // Do you bust with Aces as 11's
+				return $scoreWithAcesAsOne; // If so, return the score with Ace's as 1's
+			}else{
+				return $scoreWithAcesAsEleven;
+			}
+
+		}
+		else{ // No aces in the hand, so just return the sum of the hand
+		    return array_sum($convertedCards);
+		}
 	}
 
 	/**
@@ -299,6 +320,15 @@ class Controller extends BaseController
 	}
 
 	/**
+	 * Determine if the player has BlackJack
+	 */
+	public function calculateBlackJack()
+	{
+		// if cards in hand == 2 AND it's soft AND other card value is === 10
+
+	}
+
+	/**
 	 * @param $hand
 	 *
 	 * @return bool
@@ -343,5 +373,4 @@ class Controller extends BaseController
 		}
 		return $cards;
 	}
-
 }
