@@ -32,6 +32,11 @@ blackjack.app = {
             self.doubleDown();
         });
 
+        $('.stand-button').on('click',function(e){
+            e.preventDefault();
+            self.dealerTurn();
+        });
+
     },
     validateBet: function(val){
         if( $.isNumeric(val) && ( val > 0 && val < 1001 ) ){
@@ -72,23 +77,46 @@ blackjack.app = {
                 playerCards.append('<div class="card-up">'+result['hand']['playerHand'][1]+'</div>');
                 dealerCards.append('<div class="card-down">'+result['hand']['dealerHand'][1]+'</div>');
 
-               /* if(result['options'].double){
+                // If not split or double, allow them to hit or stand
+                if( result['options'].double === false && result['options'].split === false ){
+
+                }
+
+                if( result['options'].double ){
                     $('.double-down-button').removeClass('hidden');
                 }else if($('.double-down-button').not('.hidden')){
                     $('.double-down-button').addClass('hidden');
                 }
+                /*
                 if(result['options'].split){
                     $('.split-button').removeClass('hidden');
                 }else if($('.split-button').not('.hidden')){
                     $('.split-button').addClass('hidden');
                 }*/
+
+
             },
             error: function(e){
                 console.log(e.message);
             }
         });
     },
-
+    dealerTurn: function() {
+        console.log('dealers turn');
+        $.ajax({
+            url: "/dealers-turn",
+            method: 'get',
+            //data: {
+            //    bet: $("input[name=bet]").val(),
+            //},
+            success: function (result) {
+                console.log(result);
+                let dealerCards = $('.dealer-cards');
+                dealerCards.empty();
+                dealerCards.append('<div class="card-down">'+result['hand']+'</div>');
+            }
+        })
+    },
     split: function() {
         $.ajax({
             url: "/split",
@@ -113,12 +141,14 @@ blackjack.app = {
                 let playerCards = $('.player-cards');
                 // update the pot
                 $('.stake-chips').html(result['bet']);
+                // update the balance
+                // todo this will be added once I've added DB updates.
                 playerCards.append('<div class="card-up">'+result['playerHand'][2]+'</div>');
                 $('.double-down-button').addClass('hidden');
-                if(result.result === false){
+                if( result.result === false ){
                     alert('bust!');
                 }
-
+                // todo need to pass play to the dealer now.
             }
         })
     }

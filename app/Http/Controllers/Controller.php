@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Library\Balance;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -111,6 +112,12 @@ class Controller extends BaseController
 		// we also need to work out how much they have left and whether they can afford the bet
 		// todo for now, I'll just return what they submitted
 
+		// update record in DB.
+		// todo check in here, only update if they have the funds.  Otherwise, ask them if they want to refill their pot.
+		$user = User::find(auth()->user()->id);
+		$user->balance = $user->balance - $bet;
+		$user->save();
+
 		// This is the initial deal, so shuffle the deck.
 		$this->shuffleDeck();
 
@@ -118,7 +125,7 @@ class Controller extends BaseController
 		$deal = $this->deal();
 
 		// find the available options (stick, slice, double down, hit)
-		$options = $this->bettingOptions($this->getPlayerHand());
+		$options = $this->bettingOptions( $this->getPlayerHand() );
 
 		return [ 'bet' => $bet, 'hand' => $deal, 'options' => $options ];
 	}
@@ -126,10 +133,18 @@ class Controller extends BaseController
 
 	public function split(Request $request) : array
 	{
-		// 1. Check additional funds available
-		// 2. If available - Add additional funds
-		// 3. If not available - display message - allow user to purchase additional funds
+		$user = Auth::user();
+
+		// 1. Check additional funds available // todo this needs to be moved as it's duplicated in DoubleDown
+		if($request->bet > $user->balance){
+			// the user doesn't have enough cash.
+			// todo display message - allow user to purchase additional funds
+		}else{
+			// If available - Add additional funds
+			$bet = ( $request->bet * 2 );
+		}
 		// 4. Separate cards
+			// need to create a Hand_1 and Hand
 		// 5. Deal a card to the A hand
 		// 6. Give the option to Hit or Stand
 		// 7. If Hit - deal another card
@@ -138,7 +153,6 @@ class Controller extends BaseController
 		// 10. Go back to step 4.
 		// 11. Once finished on the second hand
 		// 12. Move to the Dealer
-
 	}
 
 	public function doubleDown(Request $request) : array
@@ -152,6 +166,11 @@ class Controller extends BaseController
 		}else{
 			// If available - Add additional funds
 			$bet = ( $request->bet * 2 );
+
+			// update the balance with the new bet // todo offload this to a service
+			$user = User::find(auth()->user()->id);
+			$user->balance = $user->balance - $bet;
+			$user->save();
 		}
 		// Deal 1 card, lay it over the other two
 		// Add new card to existing hand
@@ -159,7 +178,7 @@ class Controller extends BaseController
 		$this->setPlayerHand($newHand);
 		// Calculate if they have gone bust
 
-		$result = (( $this->calculateScore($this->getPlayerHand()) > 21 )? false : true );
+		$result = ( ( $this->calculateScore($this->getPlayerHand() ) > 21 )? false : true );
 
 		// 5. Return the card and move to the dealer
 
@@ -178,19 +197,18 @@ class Controller extends BaseController
 		$convertedCards = $this->convertPictureCards($suitRemoved); // removeSuit
 
 		// Find out if there are Aces in the hand
-		if( $acesCount = count( array_keys($convertedCards, 'A')  ) ){  // are there any aces
+		if( $acesCount = count( array_keys($convertedCards, 'A') ) ){  // are there any aces
 			$aces  = ['A']; // set the array up to remove aces from the deck
-			$score = array_sum(array_diff($convertedCards, $aces)); // calculate the score of the remaining cards (minus the ace(s))
+			$score = array_sum( array_diff( $convertedCards, $aces ) ); // calculate the score of the remaining cards (minus the ace(s))
 
 			$scoreWithAcesAsOne = $score + $acesCount;
-			$scoreWithAcesAsEleven = ($score + $acesCount) + 10;
+			$scoreWithAcesAsEleven = ( $score + $acesCount ) + 10;
 
 			if( $scoreWithAcesAsEleven > 21){ // Do you bust with Aces as 11's
 				return $scoreWithAcesAsOne; // If so, return the score with Ace's as 1's
 			}else{
 				return $scoreWithAcesAsEleven;
 			}
-
 		}
 		else{ // No aces in the hand, so just return the sum of the hand
 		    return array_sum($convertedCards);
@@ -209,7 +227,6 @@ class Controller extends BaseController
 			'playerHand' => $this->getPlayerHand(),
 			'dealerHand' => $this->getDealerHand()
 		];
-
 	}
 
 	public function getPlayerHand()
@@ -372,5 +389,30 @@ class Controller extends BaseController
 			}
 		}
 		return $cards;
+	}
+
+	/**
+	 *
+	 */
+	public function dealersTurn()
+	{
+		// The dealer does NOT get to choose how to play.
+		// If their total is less than 17, they hit.
+		// If their total is 17 or higher, they stand.
+
+		if( $this->calculateScore($this->getDealerHand() ) > 16 ){ // stand
+			return ['status'=>'stand','hand' => $this->getDealerHand()];
+		}else{
+			// hit
+			$newHand = array_merge($this->getDealerHand(),$this->pickCards(1));
+			$this->setDealerHand($newHand);
+
+			// if hand is greater than 21   - then bust
+			// if hand is greater than 17   - then stand
+			// if hand is less than 17      - then hit again
+			$bust = ( ( $this->calculateScore($this->getPlayerHand() ) > 21 )? true : false );
+			return [ 'bust' => $bust, 'hand' => $this->getDealerHand() ];
+		}
+
 	}
 }

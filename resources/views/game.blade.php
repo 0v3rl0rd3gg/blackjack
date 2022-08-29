@@ -18,7 +18,7 @@
                             Player Cards here
                         </div>
                         <div class="player-chips">
-                            Balance [{{ $balance }}]
+                            Balance [<span class="balance">{{ $balance }}</span>]
                         </div>
                         <div class="stake-chips">
                             Stake Chips here
@@ -30,7 +30,7 @@
                             <button class="hit-button bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                                 Hit
                             </button>
-                            <button class="double-down-button bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ">
+                            <button class="double-down-button hidden bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ">
                                 Double Down
                             </button>
                             <button class="split-button bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded ">

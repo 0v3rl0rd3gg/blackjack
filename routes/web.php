@@ -21,5 +21,6 @@ Route::get( '/dashboard', [ \App\Http\Controllers\Controller::class, 'index' ] )
 Route::post( 'post-bet', [ \App\Http\Controllers\Controller::class, 'postBet' ] );
 Route::get( 'split', [ \App\Http\Controllers\Controller::class, 'split' ] );
 Route::get( 'double-down', [ \App\Http\Controllers\Controller::class, 'doubleDown' ] );
+Route::get( 'dealers-turn', [ \App\Http\Controllers\Controller::class, 'dealersTurn' ] );
 
 require __DIR__.'/auth.php';

@@ -110,14 +110,14 @@ class CalculateTest extends TestCase
 	public function test_calculateScore_Safe()
 	{
 		$controller = new Controller();
-		$handOfTwenty = ['A','A',5,6,7];    // 20
-		$handOfTwentyOne = ['A','A',5,6,8]; // 21
-		$handOfSix = ['A','A','A','A',2];   // 16
-		$handOfTwelve = ['A','A','A','A',8];   // 12
-		$handOfTwentyOneAces = ['A','A','A','A',7];   // 21
-		$handOfTwentyOneKing = ['K','A'];   // 21
-		$handOfTwentyOneTen = [10,'A'];     // 21
-		$handOfTwentyOneTwoPictures = ['J','A','K'];  // 21
+		$handOfTwenty = ['AK','AS','5S','6C','7D'];    // 20
+		$handOfTwentyOne = ['AS','AD','5C','6D','8S']; // 21
+		$handOfSix = ['AS','AD','AC','AH','2C'];   // 16
+		$handOfTwelve = ['AS','AD','AC','AH','8C'];   // 12
+		$handOfTwentyOneAces = ['AS','AC','AD','AH','7H'];   // 21
+		$handOfTwentyOneKing = ['KH','AS'];   // 21
+		$handOfTwentyOneTen = ['10H','AS'];     // 21
+		$handOfTwentyOneTwoPictures = ['JH','AS','KD'];  // 21
 
 		$scoreOfTwenty = $controller->calculateScore($handOfTwenty);
 		$this->assertEquals($scoreOfTwenty,20);
@@ -148,8 +148,8 @@ class CalculateTest extends TestCase
 	public function test_calculateScore_Bust()
 	{
 		$controller = new Controller();
-		$handOfTwentyTwo = ['A','A',5,6,9];  // 22
-		$handOfTwentyTwoKing = [3,'A',10, 'Q'];  // 24
+		$handOfTwentyTwo = ['AH','AS','5S','6D','9C'];  // 22
+		$handOfTwentyTwoKing = ['3D','AS','10H', 'QC'];  // 24
 
 		$scoreOfTwentyTwo = $controller->calculateScore($handOfTwentyTwo);
 		$this->assertEquals($scoreOfTwentyTwo, 22);
