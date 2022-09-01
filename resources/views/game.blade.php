@@ -10,18 +10,18 @@
 
                     <div class="dealer">
                         <div class="dealer-cards">
-                            Dealer Cards here
+
                         </div>
                     </div>
                     <div class="player">
                         <div class="player-cards">
-                            Player Cards here
+
                         </div>
                         <div class="player-chips">
                             Balance [<span class="balance">{{ $balance }}</span>]
                         </div>
                         <div class="stake-chips">
-                            Stake Chips here
+
                         </div>
                         <div class="player-actions">
                             <button class="stand-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
@@ -39,8 +39,10 @@
                             <form action="/post-bet" class="post-bet" method="post">
                                 @csrf
                                 <input type="number" min="0" name="bet">
-                                <button type="submit" class="place-bet">Place Bet</button>
+                                <button type="submit" class="place-bet">Place Bet & Deal</button>
                             </form>
+                            <div class="message"></div>
+                            <button class="next-hand bg-gray-500 hover:bg-gray900 text-white font-bold py-2 px-4 rounded hidden">Play Next Hand</button>
                         </div>
                     </div>
                 </div>

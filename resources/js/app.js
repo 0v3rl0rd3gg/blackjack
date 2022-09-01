@@ -12,6 +12,7 @@ blackjack.app = {
             }
         });
 
+
     },
     eventListeners: function ()
     {
@@ -35,6 +36,11 @@ blackjack.app = {
         $('.stand-button').on('click',function(e){
             e.preventDefault();
             self.dealerTurn();
+        });
+
+        $('.next-hand').on('click',function(e){
+            e.preventDefault();
+            self.nextHand();
         });
 
     },
@@ -68,6 +74,7 @@ blackjack.app = {
                 let dealerCards = $('.dealer-cards');
                 // stake chips
                 $('.stake-chips').html(result['bet']);
+                $('.balance').html(result['balance']);
                 // populate the placeholders for both players
                 $('.player-cards, .dealer-cards').empty();
 
@@ -101,41 +108,44 @@ blackjack.app = {
             }
         });
     },
-    dealerTurn: function() {
-        console.log('dealers turn');
+    dealerTurn: function()
+    {
+        let self = this;
+
+        // todo 1) turn over face down card.
+
         $.ajax({
             url: "/dealers-turn",
             method: 'get',
-            //data: {
-            //    bet: $("input[name=bet]").val(),
-            //},
             success: function (result) {
                 console.log(result);
                 let dealerCards = $('.dealer-cards');
                 dealerCards.empty();
+
+                // todo as there may be multiple cards coming back, we need to turn them over one by one, slowly
+                // display the first two first, as they will be replacing the exiting ones
+                // then if there are any further cards, loop through them with a 1sec timeout.
                 dealerCards.append('<div class="card-down">'+result['hand']+'</div>');
+                $('.message').html('<p>'+result['message']+'</p>');
+                $('.next-hand').show();
             }
-        })
+        });
     },
-    split: function() {
+    split: function()
+    {
         $.ajax({
             url: "/split",
             method: 'get',
-            data: {
-                bet: $("input[name=bet]").val(),
-            },
             success: function (result) {
                 console.log(result);
             }
         })
     },
-    doubleDown: function() {
+    doubleDown: function()
+    {
         $.ajax({
             url: "/double-down",
             method: 'get',
-            data: {
-                bet: $("input[name=bet]").val(),
-            },
             success: function (result) {
 
                 let playerCards = $('.player-cards');
@@ -151,6 +161,15 @@ blackjack.app = {
                 // todo need to pass play to the dealer now.
             }
         })
+    },
+    nextHand: function()
+    {
+        $('.next-hand').hide();
+        $("input[name=bet]").val("").removeClass('hidden');
+        $('.message').hide();
+        $('.place-bet').removeClass('hidden');
+        $('.player-cards, .dealer-cards, .stake-chips').empty();
+
     }
 };
 

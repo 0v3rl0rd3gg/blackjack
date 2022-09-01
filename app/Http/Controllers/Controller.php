@@ -72,8 +72,6 @@ class Controller extends BaseController
 		'QC',
 		'KC'
 	];
-	public $playerHand = [];
-	public $dealerHand = [];
 
 	public $chips = [
 		[ 'value' => 5, 'colour' => 'White' ],
@@ -82,6 +80,9 @@ class Controller extends BaseController
 		[ 'value' => 50, 'colour' => 'Red' ],
 		[ 'value' => 100, 'colour' => 'Black' ],
 	];
+
+	public CONST WINNER_MESSAGE = 'Congratulations, you\'ve won.  Fancy another game?';
+	public CONST LOSER_MESSAGE  = 'Unlucky, the Dealer won that hand.  Fancy another game?';
 
 	public function index()
     {
@@ -107,41 +108,125 @@ class Controller extends BaseController
 	 */
 	public function postBet(Request $request) : array
 	{
+		// This is the initial deal, so shuffle the deck.
+		$this->shuffleDeck();
+
 		// add in validation here, only want bid
-		$bet = $request->input('bet');
+		$this->setBet( $request->input('bet') );
 		// we also need to work out how much they have left and whether they can afford the bet
 		// todo for now, I'll just return what they submitted
 
 		// update record in DB.
 		// todo check in here, only update if they have the funds.  Otherwise, ask them if they want to refill their pot.
 		$user = User::find(auth()->user()->id);
-		$user->balance = $user->balance - $bet;
+		$user->balance = $user->balance - $this->getBet();
 		$user->save();
 
-		// This is the initial deal, so shuffle the deck.
-		$this->shuffleDeck();
-
 		// now we've collected the bet, continue the game
-		$deal = $this->deal();
+		$hand = $this->deal();
 
 		// find the available options (stick, slice, double down, hit)
 		$options = $this->bettingOptions( $this->getPlayerHand() );
 
-		return [ 'bet' => $bet, 'hand' => $deal, 'options' => $options ];
+		return [ 'bet' => $this->getBet(), 'hand' => $hand, 'balance' => $user->balance, 'options' => $options ];
 	}
 
 
-	public function split(Request $request) : array
+	/**
+	 * @return array
+	 */
+	public function dealersTurn()
+	{
+		$score = $this->calculateScore( $this->getDealerHand() );
+
+		if( $score > 21 ) { // bust
+			return $this->dealerResult(true);
+		}elseif( $score > 16 ){ // stand
+			return $this->dealerResult(false);
+		}else{ // if the score is 16 or less, then HIT
+			$newHand = array_merge($this->getDealerHand(),$this->pickCards(1));
+			$this->setDealerHand($newHand);
+
+			$score = $this->calculateScore( $this->getDealerHand() );
+
+			if( $score <= 16 ){
+				return $this->dealersTurn();
+			}
+			elseif( $score > 21 ) { // bust
+				return $this->dealerResult(true);
+			}
+			else{
+				return $this->dealerResult(false);
+			}
+		}
+	}
+
+	/**
+	 * @param bool $bust
+	 *
+	 * @return array
+	 */
+	public function dealerResult( bool $bust )
+	{
+		$winnings   = 0;
+		$winner     = 'player';
+		$user       = User::find( auth()->user()->id );
+
+		if( $bust === true ) { // Dealer is bust, Player collects winnings
+			$winnings = $this->getBet() * 2;
+			$user->balance = $user->balance + $winnings; // Win your stake + equal amount back.
+			$user->save();
+		}else{ // Dealer is not bust, so calculate winner
+			$winner = $this->calculateWinner();
+		}
+		return [
+			'winner'    => $winner,
+	         'hand'     => $this->getDealerHand(),
+	         'balance'  => $user->balance,
+	         'winnings' => $winnings,
+			 'message' => ( ( $winner == 'player')? self::WINNER_MESSAGE : self::LOSER_MESSAGE )
+		];
+	}
+
+	public function calculateWinner()
+	{
+		// If we're calling this function, we know both the player and dealer have not gone bust.
+		//  So we need to calculate both scores, and see who has the higher score.
+
+		$playerHandScore = $this->calculateScore($this->getPlayerHand());
+		$dealerHandScore = $this->calculateScore($this->getDealerHand());
+
+
+		$user = User::find( auth()->user()->id );
+
+		if( $playerHandScore > $dealerHandScore ){ // Player wins
+			$winner = 'player';
+			// update pot with winnings
+			$user->balance = $user->balance + ( $this->getBet() * 2 ); // Win your stake + equal amount back.
+			$user->save();
+		}elseif( $dealerHandScore === $playerHandScore ){ // Draw
+			$winner = 'draw';
+			$user->balance = $user->balance + $this->getBet(); // receive original bet back
+			$user->save();
+		}
+		else{
+			$winner = 'dealer';
+		}
+		return [ 'winner' => $winner, 'balance' => $user->balance ];
+	}
+
+
+	public function split() : array
 	{
 		$user = Auth::user();
 
 		// 1. Check additional funds available // todo this needs to be moved as it's duplicated in DoubleDown
-		if($request->bet > $user->balance){
+		if($this->getBet() > $user->balance){
 			// the user doesn't have enough cash.
 			// todo display message - allow user to purchase additional funds
 		}else{
 			// If available - Add additional funds
-			$bet = ( $request->bet * 2 );
+			$this->setBet( $this->getBet() * 2 );
 		}
 		// 4. Separate cards
 			// need to create a Hand_1 and Hand
@@ -155,21 +240,21 @@ class Controller extends BaseController
 		// 12. Move to the Dealer
 	}
 
-	public function doubleDown(Request $request) : array
+	public function doubleDown() : array
 	{
 		$user = Auth::user();
 
 		// Check additional funds available
-		if($request->bet > $user->balance){
+		if($this->getBet() > $user->balance){
 			// the user doesn't have enough cash.
 			// todo display message - allow user to purchase additional funds
 		}else{
 			// If available - Add additional funds
-			$bet = ( $request->bet * 2 );
+			$this->setBet( $this->getBet() * 2);
 
 			// update the balance with the new bet // todo offload this to a service
 			$user = User::find(auth()->user()->id);
-			$user->balance = $user->balance - $bet;
+			$user->balance = $user->balance .'+'. $this->getBet();
 			$user->save();
 		}
 		// Deal 1 card, lay it over the other two
@@ -183,7 +268,7 @@ class Controller extends BaseController
 		// 5. Return the card and move to the dealer
 
 		// 6. Move play to the dealer
-		return [ 'bet' => $bet, 'playerHand' => $this->getPlayerHand(), 'result' => $result ];
+		return [ 'bet' => $this->getBet(), 'playerHand' => $this->getPlayerHand(), 'result' => $result ];
 	}
 
 	/**
@@ -229,6 +314,16 @@ class Controller extends BaseController
 		];
 	}
 
+	public function getBet()
+	{
+		return session('bet');
+	}
+
+	public function setBet($bet)
+	{
+		session(['bet' => $bet]);
+	}
+
 	public function getPlayerHand()
 	{
 		return session('playerHand');
@@ -266,7 +361,6 @@ class Controller extends BaseController
 	 */
 	public function pickCards($num) : array
 	{
-
 		// collect $num cards from the deck
 		$cards = array_slice($this->getDeck(),0,$num);
 		// remove them from the deck, so they can't be re-retrieved
@@ -389,30 +483,5 @@ class Controller extends BaseController
 			}
 		}
 		return $cards;
-	}
-
-	/**
-	 *
-	 */
-	public function dealersTurn()
-	{
-		// The dealer does NOT get to choose how to play.
-		// If their total is less than 17, they hit.
-		// If their total is 17 or higher, they stand.
-
-		if( $this->calculateScore($this->getDealerHand() ) > 16 ){ // stand
-			return ['status'=>'stand','hand' => $this->getDealerHand()];
-		}else{
-			// hit
-			$newHand = array_merge($this->getDealerHand(),$this->pickCards(1));
-			$this->setDealerHand($newHand);
-
-			// if hand is greater than 21   - then bust
-			// if hand is greater than 17   - then stand
-			// if hand is less than 17      - then hit again
-			$bust = ( ( $this->calculateScore($this->getPlayerHand() ) > 21 )? true : false );
-			return [ 'bust' => $bust, 'hand' => $this->getDealerHand() ];
-		}
-
 	}
 }
