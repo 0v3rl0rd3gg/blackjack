@@ -5,9 +5,6 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-
-
-
                     <div class="dealer">
                         <div class="dealer-cards">
 
@@ -24,16 +21,16 @@
 
                         </div>
                         <div class="player-actions">
-                            <button class="stand-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            <button class="stand-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded hidden">
                                 Stand
                             </button>
-                            <button class="hit-button bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                            <button class="hit-button bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded hidden">
                                 Hit
                             </button>
                             <button class="double-down-button hidden bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ">
                                 Double Down
                             </button>
-                            <button class="split-button bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded ">
+                            <button class="split-button bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded hidden ">
                                 Split
                             </button>
                             <form action="/post-bet" class="post-bet" method="post">

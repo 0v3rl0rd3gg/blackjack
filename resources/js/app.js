@@ -23,6 +23,16 @@ blackjack.app = {
             self.postBet();
         });
 
+        $('.stand-button').on('click',function(e){
+            e.preventDefault();
+            self.dealerTurn();
+        });
+
+        $('.hit-button').on('click',function(e){
+            e.preventDefault();
+            self.hit();
+        });
+
         $('.split-button').on('click',function(e){
             e.preventDefault();
             self.split();
@@ -31,11 +41,6 @@ blackjack.app = {
         $('.double-down-button').on('click',function(e){
             e.preventDefault();
             self.doubleDown();
-        });
-
-        $('.stand-button').on('click',function(e){
-            e.preventDefault();
-            self.dealerTurn();
         });
 
         $('.next-hand').on('click',function(e){
@@ -61,7 +66,7 @@ blackjack.app = {
         // todo - remove comments once done testing
         $("input[name=bet]").addClass('hidden');
         $('.place-bet').addClass('hidden');
-
+        $('.hit-button, .stand-button').show();
 
         $.ajax({
             url: "/post-bet",
@@ -128,6 +133,7 @@ blackjack.app = {
                 dealerCards.append('<div class="card-down">'+result['hand']+'</div>');
                 $('.message').html('<p>'+result['message']+'</p>');
                 $('.next-hand').show();
+                $('.balance').html(result['balance']);
             }
         });
     },
@@ -138,6 +144,25 @@ blackjack.app = {
             method: 'get',
             success: function (result) {
                 console.log(result);
+            }
+        })
+    },
+    hit: function()
+    {
+        $.ajax({
+            url: "/hit",
+            method: 'get',
+            success: function (result) {
+                console.log(result);
+                let playerCards = $('.player-cards');
+                playerCards.empty();
+                playerCards.append('<div class="card-down">'+result['hand']+'</div>');
+
+                if(result.bust === true){
+                    $('.message').html('<p>'+result['message']+'</p>');
+                    $('.next-hand').show();
+                    $('.hit-button, .stand-button').hide();
+                }
             }
         })
     },

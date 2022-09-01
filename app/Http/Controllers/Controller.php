@@ -83,6 +83,7 @@ class Controller extends BaseController
 
 	public CONST WINNER_MESSAGE = 'Congratulations, you\'ve won.  Fancy another game?';
 	public CONST LOSER_MESSAGE  = 'Unlucky, the Dealer won that hand.  Fancy another game?';
+	public CONST DRAW_MESSAGE  = 'That hand was a draw.  Fancy another game?';
 
 	public function index()
     {
@@ -179,12 +180,20 @@ class Controller extends BaseController
 		}else{ // Dealer is not bust, so calculate winner
 			$winner = $this->calculateWinner();
 		}
+
+		// todo at the moment, this is a turnary calc, it needs to consider draws.
+		$message = '';
+
+		// todo also - I got blackJack (see screenshot), but the computer beat me on 21.  This should not have happened.  Even if we're tied, I win
+		// todo Maybe have a check after the initial deal.  If it's blackjack - end it there.
 		return [
 			'winner'    => $winner,
 	         'hand'     => $this->getDealerHand(),
 	         'balance'  => $user->balance,
 	         'winnings' => $winnings,
-			 'message' => ( ( $winner == 'player')? self::WINNER_MESSAGE : self::LOSER_MESSAGE )
+			 'message'  => ( ( $winner == 'player')? self::WINNER_MESSAGE : self::LOSER_MESSAGE ),
+			 'dealerScore' => $this->calculateScore($this->getDealerHand()),
+			 'playerScore' => $this->calculateScore($this->getplayerHand())
 		];
 	}
 
@@ -215,6 +224,21 @@ class Controller extends BaseController
 		return [ 'winner' => $winner, 'balance' => $user->balance ];
 	}
 
+
+	public function hit()
+	{
+		$newHand = array_merge($this->getPlayerHand(), $this->pickCards(1));
+		$this->setPlayerHand($newHand);
+
+		$score = $this->calculateScore( $this->getPlayerHand() );
+		$bust = ( ( $score > 21 )? true : false );
+		return [
+			'hand' => $this->getPlayerHand(),
+			'bust' => $bust,
+			'message' => ( ( $bust )? self::LOSER_MESSAGE : '' ),
+			'score' => $score
+		];
+	}
 
 	public function split() : array
 	{

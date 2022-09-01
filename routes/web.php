@@ -19,6 +19,7 @@ Route::get('/', function () {
 
 Route::get( '/dashboard', [ \App\Http\Controllers\Controller::class, 'index' ] )->middleware('auth');
 Route::post( 'post-bet', [ \App\Http\Controllers\Controller::class, 'postBet' ] );
+Route::get( 'hit', [ \App\Http\Controllers\Controller::class, 'hit' ] );
 Route::get( 'split', [ \App\Http\Controllers\Controller::class, 'split' ] );
 Route::get( 'double-down', [ \App\Http\Controllers\Controller::class, 'doubleDown' ] );
 Route::get( 'dealers-turn', [ \App\Http\Controllers\Controller::class, 'dealersTurn' ] );
