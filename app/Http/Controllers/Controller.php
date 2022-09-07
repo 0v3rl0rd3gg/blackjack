@@ -87,9 +87,15 @@ class Controller extends BaseController
 		'dealer'    => 'Unlucky, the Dealer won that hand.  Fancy another game?'
 	];
 
+	public CONST SPLIT_HAND = [
+		0 => 'playerHand',
+		1 => 'playerSplitHand'
+	];
+
 
 	public function index()
     {
+	    $this->setCurrentSplitHand(false);
     	$balance = $this->chipBalance();
 	    return view('game',[ 'balance' => $balance]);
     }
@@ -112,6 +118,7 @@ class Controller extends BaseController
 	 */
 	public function postBet(Request $request) : array
 	{
+		$this->setCurrentSplitHand(false);
 		// This is the initial deal, so shuffle the deck.
 		$this->shuffleDeck();
 
@@ -230,19 +237,31 @@ class Controller extends BaseController
 	}
 
 
-	public function hit()
+	public function hit(Request $request)
 	{
-		$newHand = array_merge($this->getPlayerHand(), $this->pickCards(1));
-		$this->setPlayerHand($newHand);
+		if( $request->input('splitHand') === self::SPLIT_HAND[1] ){
+			$getHand = "getPlayerSplitHand";
+			$setHand = "setPlayerSplitHand";
+		}else{
+			$getHand = "getPlayerHand";
+			$setHand = "setPlayerHand";
+		}
+		$newHand = array_merge($this->$getHand(), $this->pickCards(1));
+		$this->$setHand($newHand);
 
-		$score = $this->calculateScore( $this->getPlayerHand() );
+		$score = $this->calculateScore( $this->$getHand() );
 		$bust = ( ( $score > 21 )? true : false );
 		return [
-			'hand' => $this->getPlayerHand(),
+			'hand' => $this->$getHand(),
 			'bust' => $bust,
 			'message' => ( ( $bust )? self::MESSAGES['dealer'] : '' ),
-			'score' => $score
+			'score' => $score,
+			'currentSplitHand' => $this->getCurrentSplitHand()
 		];
+	}
+	public function isSplit()
+	{
+		return $this->getCurrentSplitHand();
 	}
 
 	public function split() : array
@@ -258,8 +277,29 @@ class Controller extends BaseController
 			$this->setBet( $this->getBet() * 2 );
 		}
 		// 4. Separate cards
-			// need to create a Hand_1 and Hand
+			// need to create a Hand_1 and Hand_2
+
+		$this->setPlayerSplitHand( [ $this->getPlayerHand()[1] ] );
+		$this->setPlayerHand( [ $this->getPlayerHand()[0] ] );
+
+		// define the current hand being played
+		$this->setCurrentSplitHand( self::SPLIT_HAND[0] );
+
 		// 5. Deal a card to the A hand
+		$newHand = array_merge( $this->getPlayerHand(), $this->pickCards(1) );
+		$this->setPlayerHand($newHand);
+
+		$score = $this->calculateScore( $this->getPlayerHand() );
+		$bust = ( ( $score > 21 )? true : false );
+
+		return [
+			'playerHand' => $this->getPlayerHand(),
+			'playerSplitHand' => $this->getPlayerSplitHand(),
+			'bust' => $bust,
+			'message' => ( ( $bust )? self::MESSAGES['dealer'] : '' ),
+			'score' => $score,
+			'currentSplitHand' => $this->getCurrentSplitHand()
+		];
 		// 6. Give the option to Hit or Stand
 		// 7. If Hit - deal another card
 		// 8. If not bust, give option to Hit or Stand
@@ -363,6 +403,16 @@ class Controller extends BaseController
 		session(['playerHand' => $cards]);
 	}
 
+	public function getPlayerSplitHand()
+	{
+		return session('playerSplitHand');
+	}
+
+	public function setPlayerSplitHand($cards)
+	{
+		session(['playerSplitHand' => $cards]);
+	}
+
 	public function getDealerHand()
 	{
 		return session('dealerHand');
@@ -382,6 +432,17 @@ class Controller extends BaseController
 	{
 		session(['deck' => $deck]);
 	}
+
+	public function getCurrentSplitHand()
+	{
+		return session('currentSplitHand');
+	}
+
+	public function setCurrentSplitHand($handNumber)
+	{
+		session(['currentSplitHand' => $handNumber]);
+	}
+
 
 	/**
 	 * @param $num

@@ -14,6 +14,9 @@
                         <div class="player-cards">
 
                         </div>
+                        <div class="player-split-cards">
+
+                        </div>
                         <div class="player-chips">
                             Balance [<span class="balance">{{ $balance }}</span>]
                         </div>
@@ -28,10 +31,13 @@
                             <button class="hit-button bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded hidden">
                                 Hit
                             </button>
+                            <button class="hit-split-button bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded ">
+                                Hit
+                            </button>
                             <button class="double-down-button hidden bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ">
                                 Double Down
                             </button>
-                            <button class="split-button bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded hidden ">
+                            <button class="split-button bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded  ">
                                 Split
                             </button>
                             <form action="/post-bet" class="post-bet" method="post">

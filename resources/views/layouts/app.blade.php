@@ -13,6 +13,9 @@
     .player-cards{
         color:green;
     }
+    .player-split-cards{
+        color:darkblue;
+    }
 </style>
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

@@ -25,12 +25,17 @@ blackjack.app = {
 
         $('.stand-button').on('click',function(e){
             e.preventDefault();
-            self.dealerTurn();
+            self.stand();
         });
 
         $('.hit-button').on('click',function(e){
             e.preventDefault();
             self.hit();
+        });
+
+        $('.hit-split-button').on('click',function(e){
+            e.preventDefault();
+            self.hit(true);
         });
 
         $('.split-button').on('click',function(e){
@@ -141,35 +146,109 @@ blackjack.app = {
     },
     split: function()
     {
+        let playerCards = $('.player-cards');
+        let playerSplitCards = $('.player-split-cards');
+
         $.ajax({
             url: "/split",
             method: 'get',
             success: function (result) {
+                console.log('split');
                 console.log(result);
+
+                playerCards.empty();
+
+                for( let i = 0; i < result['playerHand'].length; i++ ) {
+                    playerCards.append('<div class="card-down">' + result['playerHand'][i] + '</div>');
+                }
+
+                for( let i = 0; i < result['playerSplitHand'].length; i++ ) {
+                    playerSplitCards.append('<div class="card-down">' + result['playerSplitHand'][i] + '</div>');
+                }
+
             }
         })
     },
-    hit: function()
+    hit: function(splitHand = false)
     {
         $.ajax({
             url: "/hit",
-            method: 'get',
+            method: 'post',
+            data:{
+                splitHand: splitHand
+            },
             success: function (result) {
+
                 console.log(result);
-                let playerCards = $('.player-cards');
-                playerCards.empty();
+                let cards = $('.player-cards');
+                if( result.currentSplitHand !== false ){
+                    cards = ( ( result.currentSplitHand === 'playerSplitHand' )? $('.player-split-cards') : $('.player-cards') );
+                }
+
+                cards.empty();
 
                 for( let i = 0; i < result['hand'].length; i++ ){
-                    playerCards.append('<div class="card-down">'+result['hand'][i]+'</div>');
+                    cards.append('<div class="card-down">'+result['hand'][i]+'</div>');
                 }
 
                 if(result.bust === true){
-                    $('.message').html('<p>'+result.message+'</p>').show();
-                    $('.next-hand').show();
-                    $('.hit-button, .stand-button').hide();
+                    if(result.currentSplitHand !== false){
+                        // check which hand.
+                        // if it's hand 0, then move to hand 1.
+                        if(result.currentSplitHand !== 'playerHand'){
+                            // todo - need to work out how I can easily determine whether I"m in a split, and if so - which one
+                            // I need a function that I can call after the inital split is called
+                            // it's called if the hand 0 goes bust OR if hand 0 stands.
+                            // it is called when hand 1 goes bust or hand 1 stands
+                            // I also need to consider, when I check if my hand is better than the dealer, which ones.
+                            // if none are better than the dealer, then I  lose
+                            // if one is better than the dealer then I break even
+                            // if both hands are better than the dealer, I win big
+                        }
+                        // if it's hand 1, then move to dealer.
+                    }else {
+                        $('.message').html('<p>' + result.message + '</p>').show();
+                        $('.next-hand').show();
+                        $('.hit-button, .stand-button').hide();
+                    }
                 }
             }
         })
+    },
+    stand: function(){
+        let self = this;
+        let splitHand = false;
+        // need to understand if I'm standing on a split,
+        // and if so,
+        //      is it split 0
+        //      or split 1
+
+        $.ajax({
+            url: "/is-split",
+            method: 'get',
+
+            success: function (result) {
+                console.log(result);
+                splitHand = result;
+
+
+
+                // if split 0, then save that hand and move to the next, where I can hit or stand
+                // if split 1, then move to the dealer
+                if( splitHand !== false && splitHand === 'playerHand' ){
+                    //otherwise we've played both hands, so move to the dealer
+                    console.log('now playing split hand');
+                    self.hit('playerSplitHand');
+                }
+
+                // Otherwise, if its not a split, then just move to the dealer
+                self.dealerTurn();
+
+            }
+        });
+
+
+
     },
     doubleDown: function()
     {
@@ -202,7 +281,7 @@ blackjack.app = {
         $("input[name=bet]").val("").removeClass('hidden');
         $('.message').hide();
         $('.place-bet').removeClass('hidden');
-        $('.player-cards, .dealer-cards, .stake-chips').empty();
+        $('.player-cards, .player-split-cards, .dealer-cards, .stake-chips').empty();
 
     }
 };
