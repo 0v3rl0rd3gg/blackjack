@@ -81,9 +81,12 @@ class Controller extends BaseController
 		[ 'value' => 100, 'colour' => 'Black' ],
 	];
 
-	public CONST WINNER_MESSAGE = 'Congratulations, you\'ve won.  Fancy another game?';
-	public CONST LOSER_MESSAGE  = 'Unlucky, the Dealer won that hand.  Fancy another game?';
-	public CONST DRAW_MESSAGE  = 'That hand was a draw.  Fancy another game?';
+	public CONST MESSAGES = [
+		'draw'      =>'That hand was a draw.  Fancy another game?',
+		'player'    => 'Congratulations, you\'ve won.  Fancy another game?',
+		'dealer'    => 'Unlucky, the Dealer won that hand.  Fancy another game?'
+	];
+
 
 	public function index()
     {
@@ -182,7 +185,6 @@ class Controller extends BaseController
 		}
 
 		// todo at the moment, this is a turnary calc, it needs to consider draws.
-		$message = '';
 
 		// todo also - I got blackJack (see screenshot), but the computer beat me on 21.  This should not have happened.  Even if we're tied, I win
 		// todo Maybe have a check after the initial deal.  If it's blackjack - end it there.
@@ -191,13 +193,16 @@ class Controller extends BaseController
 	         'hand'     => $this->getDealerHand(),
 	         'balance'  => $user->balance,
 	         'winnings' => $winnings,
-			 'message'  => ( ( $winner == 'player')? self::WINNER_MESSAGE : self::LOSER_MESSAGE ),
+			 'message'  => self::MESSAGES[$winner],
 			 'dealerScore' => $this->calculateScore($this->getDealerHand()),
 			 'playerScore' => $this->calculateScore($this->getplayerHand())
 		];
 	}
 
-	public function calculateWinner()
+	/**
+	 * @return string
+	 */
+	public function calculateWinner() : string
 	{
 		// If we're calling this function, we know both the player and dealer have not gone bust.
 		//  So we need to calculate both scores, and see who has the higher score.
@@ -221,7 +226,7 @@ class Controller extends BaseController
 		else{
 			$winner = 'dealer';
 		}
-		return [ 'winner' => $winner, 'balance' => $user->balance ];
+		return $winner;
 	}
 
 
@@ -235,7 +240,7 @@ class Controller extends BaseController
 		return [
 			'hand' => $this->getPlayerHand(),
 			'bust' => $bust,
-			'message' => ( ( $bust )? self::LOSER_MESSAGE : '' ),
+			'message' => ( ( $bust )? self::MESSAGES['dealer'] : '' ),
 			'score' => $score
 		];
 	}
@@ -278,7 +283,7 @@ class Controller extends BaseController
 
 			// update the balance with the new bet // todo offload this to a service
 			$user = User::find(auth()->user()->id);
-			$user->balance = $user->balance .'+'. $this->getBet();
+			$user->balance = $user->balance + $this->getBet();
 			$user->save();
 		}
 		// Deal 1 card, lay it over the other two

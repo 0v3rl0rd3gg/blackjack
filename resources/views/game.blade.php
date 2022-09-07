@@ -21,6 +21,7 @@
 
                         </div>
                         <div class="player-actions">
+
                             <button class="stand-button bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded hidden">
                                 Stand
                             </button>

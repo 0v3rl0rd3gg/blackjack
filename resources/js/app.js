@@ -116,7 +116,7 @@ blackjack.app = {
     dealerTurn: function()
     {
         let self = this;
-
+        $('.hit-button, .stand-button').hide();
         // todo 1) turn over face down card.
 
         $.ajax({
@@ -130,8 +130,10 @@ blackjack.app = {
                 // todo as there may be multiple cards coming back, we need to turn them over one by one, slowly
                 // display the first two first, as they will be replacing the exiting ones
                 // then if there are any further cards, loop through them with a 1sec timeout.
-                dealerCards.append('<div class="card-down">'+result['hand']+'</div>');
-                $('.message').html('<p>'+result['message']+'</p>');
+                for( let i = 0; i < result['hand'].length; i++ ) {
+                    dealerCards.append('<div class="card-down">' + result['hand'][i] + '</div>');
+                }
+                $('.message').html('<p>'+result.message+'</p>').show();
                 $('.next-hand').show();
                 $('.balance').html(result['balance']);
             }
@@ -156,10 +158,13 @@ blackjack.app = {
                 console.log(result);
                 let playerCards = $('.player-cards');
                 playerCards.empty();
-                playerCards.append('<div class="card-down">'+result['hand']+'</div>');
+
+                for( let i = 0; i < result['hand'].length; i++ ){
+                    playerCards.append('<div class="card-down">'+result['hand'][i]+'</div>');
+                }
 
                 if(result.bust === true){
-                    $('.message').html('<p>'+result['message']+'</p>');
+                    $('.message').html('<p>'+result.message+'</p>').show();
                     $('.next-hand').show();
                     $('.hit-button, .stand-button').hide();
                 }
@@ -172,13 +177,17 @@ blackjack.app = {
             url: "/double-down",
             method: 'get',
             success: function (result) {
-
+                console.log(result);
                 let playerCards = $('.player-cards');
                 // update the pot
                 $('.stake-chips').html(result['bet']);
                 // update the balance
                 // todo this will be added once I've added DB updates.
-                playerCards.append('<div class="card-up">'+result['playerHand'][2]+'</div>');
+                playerCards.empty();
+                for( let i = 0; i < result['hand'].length; i++ ){
+                    playerCards.append('<div class="card-down">'+result['hand'][i]+'</div>');
+                }
+                //playerCards.append('<div class="card-up">'+result['playerHand'][2]+'</div>');
                 $('.double-down-button').addClass('hidden');
                 if( result.result === false ){
                     alert('bust!');
@@ -186,7 +195,7 @@ blackjack.app = {
                 // todo need to pass play to the dealer now.
             }
         })
-    },
+    }
     nextHand: function()
     {
         $('.next-hand').hide();
