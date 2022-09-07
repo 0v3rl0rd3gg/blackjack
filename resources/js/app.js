@@ -195,7 +195,7 @@ blackjack.app = {
                 // todo need to pass play to the dealer now.
             }
         })
-    }
+    },
     nextHand: function()
     {
         $('.next-hand').hide();
