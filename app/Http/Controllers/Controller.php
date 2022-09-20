@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Library\Balance;
+use App\Models\Hand;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -95,6 +96,8 @@ class Controller extends BaseController
 
 	public function index()
     {
+    	$hand = Hand::getCurrentHand( auth()->user(),true);
+    	dd($hand);
 	    $this->setCurrentSplitHand(false);
     	$balance = $this->chipBalance();
 	    return view('game',[ 'balance' => $balance]);
